@@ -15,7 +15,7 @@ The scanner evaluates several "Red Flags" to determine the risk:
 *   **Combined Signals:** Assigns a higher risk (Danger) if suspicious keywords are found alongside external links (`http/www`).
 *   **Timing Analysis:** Flags emails processed during "suspicious" late-night hours (00:00 - 05:00).
 
-## 📊 Scoring Logic (The Decision Making)
+## Scoring Logic (The Decision Making)
 I designed a weighted scoring system to evaluate risk based on specific signals:
 *   **The "Red Flag" (75 Points):** If an email contains both a high-pressure keyword (like "immediately" or "verify now") AND a link, it's flagged as **Dangerous**. This is because the combination of urgency and a call-to-action is a classic phishing tactic.
 *   **Suspicious(60 Points):** If the system finds 3 or more suspicious keywords even without a link, it's flagged as **Suspicious**. Multiple red flags indicate a high probability of a scam.
@@ -37,7 +37,7 @@ I designed a weighted scoring system to evaluate risk based on specific signals:
 * **Handling "Dirty" Data:** I assumed that attackers would try to trick the system by using weird capitalization (like "uRgEnT"). To fix this, the backend automatically converts all text to lowercase before checking it, making the scanner much harder to bypass.
 * **Safety First:** My scoring logic is designed to be strict. If an email has both a "stressful" keyword and a link, it immediately gets a high risk score because that is the most common way phishing works.
 
-## 📈 Future Improvements
+## Future Improvements
 With more time, I would implement:
 *   **URL Reputation:** Integration with APIs like VirusTotal to check if links lead to known malicious sites.
 *   **LLM Integration (AI):** Instead of relying on a fixed list of keywords, I would integrate a Large Language Model (like Gemini). This would allow the system to understand the intent and content of the email and recognize suspicious patterns and thousands of "danger words" automatically, even if they aren't on my manual list.
