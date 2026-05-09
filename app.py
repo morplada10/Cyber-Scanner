@@ -3,6 +3,9 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+# A simple list of domains the user normally works with
+TRUSTED_DOMAINS = ["google.com", "microsoft.com", "bank-hapoalim.co.il", "amazon.com", "paypal.com"]
+
 # The logic to figure out if an email is "bad"/"dangerous"
 def analyze_email_logic(sender, content):
     score = 0
@@ -16,8 +19,8 @@ def analyze_email_logic(sender, content):
     # A list of "red flag" words that make us suspicious
     urgency_keywords = [
         'urgent', 'immediately', 'action required', 'suspended', 'verify now', 
-        'important', 'legal action', 'credit card', 'payment'
-        'bank', 'password', 'login', 'tax evasion', 'frozen'
+        'important', 'legal action', 'credit card', 'payment',
+        'bank', 'password', 'login', 'tax evasion', 'frozen', 'invoice', 'pay'
     ]
     # We turn everything to lowercase so hackers can't trick us with weird casing (like UrGeNt)
     content_lower = content.lower()
@@ -40,13 +43,23 @@ def analyze_email_logic(sender, content):
     elif has_urgency:
         score += 20
         reasons.append(f"Suspicious language detected: {found_keywords}")
+    
+    # Smart Context Analysis (Payment from unknown sender)
+    # Get the domain from the sender's email
+    domain = sender.split('@')[-1].lower()
+    payment_keywords = ["payment", "invoice", "billing", "wire transfer", "credit card"]
+    has_payment_request = any(word in content_lower for word in payment_keywords)
+    
+    if has_payment_request and domain not in TRUSTED_DOMAINS:
+        score += 45
+        reasons.append(f"Context Warning: Payment request from an unknown domain ({domain})")
 
     # Checking if the email was sent late at night (00:00 to 05:00) - a common time for attacks
     current_hour = datetime.now().hour
     if 0 <= current_hour <= 5:
         score += 10
         reasons.append(f"Suspicious timing: Email processed at {current_hour}:00")
-
+        
     # Return the final score (capped at 100) and the reasons why we gave it
     return min(score, 100), reasons
 
